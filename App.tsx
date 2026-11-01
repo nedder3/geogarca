@@ -14,6 +14,7 @@ import { CartesianGrid } from '@/components/canvas/CartesianGrid';
 import { VirtualKeyboard } from '@/components/keyboard/VirtualKeyboard';
 import { AlgebraPanel } from '@/components/algebra/AlgebraPanel';
 import { ToolsGallery } from '@/components/tools/ToolsGallery';
+import { SplashScreenView } from '@/components/splash/SplashScreenView';
 import {
   StartExamDialog,
   ExitExamDialog,
@@ -23,6 +24,7 @@ import { useExamStore } from '@/stores/useExamStore';
 import { useInputStore } from '@/stores/useInputStore';
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState<MainTab>('algebra');
   const [isDrawerOpen, setDrawerOpen] = useState(false);
 
@@ -141,6 +143,14 @@ export default function App() {
             visible={isSummaryOpen}
             onDismiss={dismissSummary}
           />
+
+          {/* Animated In-App Splash Screen */}
+          {showSplash && (
+            <SplashScreenView
+              durationMs={1200}
+              onFinish={() => setShowSplash(false)}
+            />
+          )}
         </View>
       </SafeAreaView>
     </SafeAreaProvider>
