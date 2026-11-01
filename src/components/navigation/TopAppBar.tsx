@@ -7,6 +7,7 @@ import { useExamStore } from '@/stores/useExamStore';
 
 interface TopAppBarProps {
   title?: string;
+  isExamActive?: boolean;
   showProbabilityActions?: boolean;
   onOpenMenu: () => void;
   onOpenSettings?: () => void;
@@ -16,13 +17,15 @@ interface TopAppBarProps {
 
 export const TopAppBar: React.FC<TopAppBarProps> = ({
   title = 'Suite Calculadora',
-  showProbabilityActions = false,
+  isExamActive: propExamActive,
+  showProbabilityActions = true,
   onOpenMenu,
   onOpenSettings,
   onToggleCurve,
   onToggleTable,
 }) => {
-  const isExamActive = useExamStore((state) => state.isExamActive);
+  const storeExamActive = useExamStore((state) => state.isExamActive);
+  const isExamActive = propExamActive ?? storeExamActive;
   const formattedDuration = useExamStore((state) => state.formattedDuration);
   const batteryLevel = useExamStore((state) => state.batteryLevel);
 

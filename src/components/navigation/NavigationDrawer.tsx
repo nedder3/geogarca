@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GeoGebraTheme } from '@/theme/tokens';
 import { useExamStore } from '@/stores/useExamStore';
 
 interface NavigationDrawerProps {
   title?: string;
+  activeAppMode?: 'probability' | 'graphing';
   visible: boolean;
   onClose: () => void;
   onSelectOption: (optionId: string) => void;
@@ -20,11 +21,11 @@ export interface DrawerOption {
 
 /**
  * NavigationDrawer replicates the side menu seen in:
- * - Normal mode: WhatsApp Image 2026-10-31 at 10.48.04 PM (4).jpeg
- * - Exam mode: WhatsApp Image 2026-10-31 at 10.46.04 PM.jpeg
+ * - media_1793555517262_6b4ff508.png (Suite Calculadora GeoGebra Official)
  */
 export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
   title = 'Suite Calculadora GeoGebra',
+  activeAppMode = 'probability',
   visible,
   onClose,
   onSelectOption,
@@ -48,8 +49,10 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
     { id: 'login', label: 'Abrir sesión', icon: 'log-in-outline' },
   ];
 
-  // Options restricted in Exam Mode
+  // Options shown in Exam Mode (retains sub-app switching to prevent getting anchored)
   const examOptions: DrawerOption[] = [
+    { id: 'switch_probability', label: 'Probabilidad', icon: 'pulse-outline' },
+    { id: 'switch_graphing', label: 'Calculadora Gráfica', icon: 'calculator-outline', showDividerAfter: true },
     { id: 'clear_all', label: 'Borrar todo', icon: 'close-outline' },
     { id: 'open', label: 'Abrir', icon: 'search-outline' },
     { id: 'save', label: 'Guardar', icon: 'save-outline' },
@@ -71,24 +74,41 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
         <Text style={styles.headerTitle}>{title}</Text>
 
         <View style={styles.optionsList}>
-          {currentOptions.map((opt) => (
-            <React.Fragment key={opt.id}>
-              <TouchableOpacity
-                testID={`drawer-opt-${opt.id}`}
-                onPress={() => onSelectOption(opt.id)}
-                style={styles.optionRow}
-              >
-                <Ionicons
-                  name={opt.icon}
-                  size={22}
-                  color={GeoGebraTheme.colors.textSecondary}
-                  style={styles.optionIcon}
-                />
-                <Text style={styles.optionLabel}>{opt.label}</Text>
-              </TouchableOpacity>
-              {opt.showDividerAfter && <View style={styles.divider} />}
-            </React.Fragment>
-          ))}
+          {currentOptions.map((opt) => {
+            const isSubAppActive =
+              (opt.id === 'switch_probability' && activeAppMode === 'probability') ||
+              (opt.id === 'switch_graphing' && activeAppMode === 'graphing');
+
+            return (
+              <React.Fragment key={opt.id}>
+                <TouchableOpacity
+                  testID={`drawer-opt-${opt.id}`}
+                  onPress={() => onSelectOption(opt.id)}
+                  style={[styles.optionRow, isSubAppActive && styles.optionRowActive]}
+                >
+                  <Ionicons
+                    name={opt.icon}
+                    size={22}
+                    color={
+                      isSubAppActive
+                        ? GeoGebraTheme.colors.primaryPurple
+                        : GeoGebraTheme.colors.textSecondary
+                    }
+                    style={styles.optionIcon}
+                  />
+                  <Text
+                    style={[
+                      styles.optionLabel,
+                      isSubAppActive && styles.optionLabelActive,
+                    ]}
+                  >
+                    {opt.label}
+                  </Text>
+                </TouchableOpacity>
+                {opt.showDividerAfter && <View style={styles.divider} />}
+              </React.Fragment>
+            );
+          })}
         </View>
       </View>
     </View>
@@ -102,7 +122,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    flexDirection: 'row',
     zIndex: 9999,
     elevation: 9999,
   },
@@ -112,25 +131,25 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
   drawerPane: {
-    width: '80%',
-    maxWidth: 320,
+    width: 290,
     height: '100%',
     backgroundColor: '#FFFFFF',
-    paddingTop: 48,
+    paddingTop: 36,
     paddingHorizontal: 16,
-    elevation: 16,
     shadowColor: '#000',
-    shadowOpacity: 0.25,
     shadowOffset: { width: 4, height: 0 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 16,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: GeoGebraTheme.typography.weights.medium,
+    fontSize: 19,
+    fontWeight: GeoGebraTheme.typography.weights.bold,
     color: GeoGebraTheme.colors.textPrimary,
-    marginBottom: 24,
+    marginBottom: 20,
     paddingHorizontal: 8,
   },
   optionsList: {
@@ -140,20 +159,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
     borderRadius: 8,
   },
+  optionRowActive: {
+    backgroundColor: '#F3EFFF',
+  },
   optionIcon: {
-    marginRight: 20,
+    marginRight: 16,
   },
   optionLabel: {
     fontSize: 15,
     color: GeoGebraTheme.colors.textPrimary,
     fontWeight: GeoGebraTheme.typography.weights.medium,
   },
+  optionLabelActive: {
+    color: GeoGebraTheme.colors.primaryPurple,
+    fontWeight: GeoGebraTheme.typography.weights.bold,
+  },
   divider: {
     height: 1,
     backgroundColor: GeoGebraTheme.colors.borderLight,
-    marginVertical: 8,
+    marginVertical: 6,
   },
 });
