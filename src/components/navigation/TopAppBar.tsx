@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { GeoGebraTheme } from '@/theme/tokens';
 import { useExamStore } from '@/stores/useExamStore';
@@ -17,7 +18,7 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ onOpenMenu, onOpenSettings
   if (isExamActive) {
     return (
       <View testID="exam-header" style={styles.examContainer}>
-        <StatusBar backgroundColor={GeoGebraTheme.colors.examHeaderDark} barStyle="light-content" />
+        <StatusBar style="light" />
         <View style={styles.statusBarMock}>
           <Text style={styles.headerTitleSmall}>Calc. Gráfica</Text>
           <Text style={styles.timerText}>{formattedDuration}</Text>
@@ -50,7 +51,7 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ onOpenMenu, onOpenSettings
 
   return (
     <View testID="normal-header" style={styles.normalContainer}>
-      <StatusBar backgroundColor="#FFFFFF" barStyle="dark-content" />
+      <StatusBar style="dark" />
       <TouchableOpacity
         testID="menu-button"
         onPress={onOpenMenu}
