@@ -1,43 +1,106 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, act } from '@testing-library/react-native';
 import { ProbabilityView } from '../ProbabilityView';
 
-describe('ProbabilityView Component', () => {
-  it('renders the distribution chart and simulated histogram bars', async () => {
-    const { getByTestId, getAllByTestId } = await render(<ProbabilityView />);
+describe('ProbabilityView Component - Multi-Distribution Mocks', () => {
+  it('renders distribution selector button and default distribution', async () => {
+    const { getByTestId, getByText } = await render(<ProbabilityView />);
     expect(getByTestId('probability-chart')).toBeTruthy();
-    const bars = getAllByTestId(/histogram-bar-/);
-    expect(bars.length).toBeGreaterThan(0);
+    expect(getByTestId('distribution-selector-btn')).toBeTruthy();
+    expect(getByText('Hipergeométrica')).toBeTruthy();
   });
 
-  it('renders the interval type selector buttons with simulated values', async () => {
-    const { getByTestId } = await render(<ProbabilityView />);
-    expect(getByTestId('interval-btn-left')).toBeTruthy();
-    expect(getByTestId('interval-btn-between')).toBeTruthy();
-    expect(getByTestId('interval-btn-right')).toBeTruthy();
-  });
+  it('opens distribution picker modal when clicking selector', async () => {
+    const { getByTestId, getByText } = await render(<ProbabilityView />);
 
-  it('allows switching interval mode when tapping buttons', async () => {
-    const { getByTestId } = await render(<ProbabilityView />);
-    const betweenBtn = getByTestId('interval-btn-between');
-    fireEvent.press(betweenBtn);
-    expect(getByTestId('interval-btn-between')).toBeTruthy();
-  });
-
-  it('renders Population and Parámetro n inputs with default values 30 and 10', async () => {
-    const { getByDisplayValue, getByText } = await render(<ProbabilityView />);
-    expect(getByText('Population')).toBeTruthy();
-    expect(getByDisplayValue('30')).toBeTruthy();
-    expect(getByText('Parámetro n')).toBeTruthy();
-    expect(getByDisplayValue('10')).toBeTruthy();
-  });
-
-  it('allows editing parameter inputs without crashing', async () => {
-    const { getByDisplayValue } = await render(<ProbabilityView />);
-    const popInput = getByDisplayValue('30');
-    fireEvent.changeText(popInput, '35');
-    await waitFor(() => {
-      expect(getByDisplayValue('35')).toBeTruthy();
+    await act(async () => {
+      fireEvent.press(getByTestId('distribution-selector-btn'));
     });
+
+    expect(getByTestId('distribution-picker-modal')).toBeTruthy();
+    expect(getByText('Binomial')).toBeTruthy();
+    expect(getByText('Poisson')).toBeTruthy();
+    expect(getByText('Normal')).toBeTruthy();
+    expect(getByText('Geométrica')).toBeTruthy();
+  });
+
+  it('switches to Poisson distribution with mocked lambda=4 parameter and formula', async () => {
+    const { getByTestId, getByText, queryByTestId } = await render(<ProbabilityView />);
+
+    await act(async () => {
+      fireEvent.press(getByTestId('distribution-selector-btn'));
+    });
+
+    await act(async () => {
+      fireEvent.press(getByTestId('dist-option-poisson'));
+    });
+
+    // Modal closed
+    expect(queryByTestId('distribution-picker-modal')).toBeNull();
+
+    // Verify Poisson parameters and result
+    expect(getByText('Poisson')).toBeTruthy();
+    expect(getByText('Media λ')).toBeTruthy();
+    expect(getByText(/P\(X ≤ 4\) = 0\.6288/)).toBeTruthy();
+  });
+
+  it('switches to Binomial distribution with mocked n=20, p=0.5 parameters and formula', async () => {
+    const { getByTestId, getByText } = await render(<ProbabilityView />);
+
+    await act(async () => {
+      fireEvent.press(getByTestId('distribution-selector-btn'));
+    });
+
+    await act(async () => {
+      fireEvent.press(getByTestId('dist-option-binomial'));
+    });
+
+    expect(getByText('Binomial')).toBeTruthy();
+    expect(getByText('Ensayos n')).toBeTruthy();
+    expect(getByText('Probabilidad p')).toBeTruthy();
+    expect(getByText(/P\(X ≤ 10\) = 0\.5881/)).toBeTruthy();
+  });
+
+  it('switches to Normal distribution with continuous curve and mu=0, sigma=1', async () => {
+    const { getByTestId, getByText } = await render(<ProbabilityView />);
+
+    await act(async () => {
+      fireEvent.press(getByTestId('distribution-selector-btn'));
+    });
+
+    await act(async () => {
+      fireEvent.press(getByTestId('dist-option-normal'));
+    });
+
+    expect(getByText('Normal')).toBeTruthy();
+    expect(getByTestId('normal-continuous-curve')).toBeTruthy();
+    expect(getByText('Media μ')).toBeTruthy();
+    expect(getByText('Desv. Est. σ')).toBeTruthy();
+  });
+
+  it('toggles probability values table when showTable prop is true', async () => {
+    const { getByTestId, getByText } = await render(
+      <ProbabilityView showTable={true} />
+    );
+
+    expect(getByTestId('probability-table')).toBeTruthy();
+    expect(getByText('P(X = k)')).toBeTruthy();
+    expect(getByText('k')).toBeTruthy();
+  });
+
+  it('updates formula and highlighted bars when switching interval modes', async () => {
+    const { getByTestId, getByText } = await render(<ProbabilityView />);
+
+    // Tap Between
+    await act(async () => {
+      fireEvent.press(getByTestId('interval-btn-between'));
+    });
+    expect(getByText(/P\(2 ≤ X ≤ 4\)/)).toBeTruthy();
+
+    // Tap Right
+    await act(async () => {
+      fireEvent.press(getByTestId('interval-btn-right'));
+    });
+    expect(getByText(/P\(X ≥ 3\)/)).toBeTruthy();
   });
 });
