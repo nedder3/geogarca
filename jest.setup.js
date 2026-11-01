@@ -11,3 +11,12 @@ jest.mock('@expo/vector-icons', () => {
     MaterialCommunityIcons: (props) => React.createElement(Text, { testID: props.testID || `icon-${props.name}` }, props.name),
   };
 });
+
+// Suppress known React 19 test renderer act() warning in synthetic tests
+const originalConsoleError = console.error;
+console.error = (...args) => {
+  if (typeof args[0] === 'string' && args[0].includes('overlapping act() calls')) {
+    return;
+  }
+  originalConsoleError(...args);
+};
