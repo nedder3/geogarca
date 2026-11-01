@@ -7,10 +7,9 @@ interface Props {
 }
 
 /**
- * SplashScreenView replicates the exact launch screen from
- * WhatsApp Image 2026-10-31 at 10.48.04 PM.jpeg
+ * SplashScreenView replicates the clean launch screen of GeoGebra Suite
  */
-export const SplashScreenView: React.FC<Props> = ({ onFinish, durationMs = 1500 }) => {
+export const SplashScreenView: React.FC<Props> = ({ onFinish, durationMs = 1200 }) => {
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -30,7 +29,7 @@ export const SplashScreenView: React.FC<Props> = ({ onFinish, durationMs = 1500 
   return (
     <Animated.View testID="splash-screen-view" style={[styles.container, { opacity: fadeAnim }]}>
       <Image
-        source={require('../../../assets/splash.png')}
+        source={require('../../../assets/geogebra-logo.png')}
         style={styles.splashImage}
         resizeMode="contain"
         testID="splash-image"
@@ -53,7 +52,7 @@ const styles = StyleSheet.create({
     elevation: 10000,
   },
   splashImage: {
-    width: '75%',
-    height: '75%',
+    width: 140,
+    height: 140,
   },
 });
