@@ -6,38 +6,51 @@ import { useInputStore } from '@/stores/useInputStore';
 
 afterEach(cleanup);
 
-describe('GeoGebra Replica App Integration Flow', () => {
+describe('GeoGebra Suite Replica App Integration Flow', () => {
   beforeEach(() => {
     useExamStore.getState().reset();
     useInputStore.getState().reset();
   });
 
-  it('renders main application with header, canvas, algebra panel and bottom nav', async () => {
-    const { getByTestId, getByText } = await render(<App />);
+  it('renders default Suite Calculadora Probability/Distribution view and bottom nav', async () => {
+    const { getByTestId, getByText, queryByText } = await render(<App />);
 
     expect(getByTestId('normal-header')).toBeTruthy();
-    expect(getByTestId('cartesian-grid')).toBeTruthy();
-    expect(getByTestId('algebra-panel')).toBeTruthy();
+    expect(getByTestId('probability-chart')).toBeTruthy();
     expect(getByTestId('bottom-nav-bar')).toBeTruthy();
-    expect(getByText('Álgebra')).toBeTruthy();
-    expect(getByText('Herramientas')).toBeTruthy();
+    expect(getByText('Distribución')).toBeTruthy();
+    expect(getByText('Population')).toBeTruthy();
+    expect(getByText('Parámetro n')).toBeTruthy();
+    expect(queryByText('Álgebra')).toBeNull();
   });
 
-  it('switches between tabs and shows ToolsGallery when clicking Herramientas', async () => {
-    const { getByTestId, queryByTestId } = await render(<App />);
+  it('allows switching to Calculadora Gráfica via drawer and using tabs', async () => {
+    const { getByTestId, getByText, queryByTestId } = await render(<App />);
 
+    // Open drawer
+    await act(async () => {
+      fireEvent.press(getByTestId('menu-button'));
+    });
+
+    // Select Calculadora Gráfica
+    await act(async () => {
+      fireEvent.press(getByTestId('drawer-opt-switch_graphing'));
+    });
+
+    expect(getByTestId('cartesian-grid')).toBeTruthy();
     expect(getByTestId('algebra-panel')).toBeTruthy();
-    expect(queryByTestId('tools-gallery')).toBeNull();
+    expect(getByText('Álgebra')).toBeTruthy();
+    expect(getByText('Herramientas')).toBeTruthy();
 
+    // Switch to Herramientas
     await act(async () => {
       fireEvent.press(getByTestId('tab-tools'));
     });
-
     expect(getByTestId('tools-gallery')).toBeTruthy();
     expect(queryByTestId('algebra-panel')).toBeNull();
   });
 
-  it('executes complete exam lifecycle: open drawer -> start exam -> green header -> exit -> exam ok summary', async () => {
+  it('executes complete exam lifecycle in Suite Calculadora: open drawer -> start exam -> green header -> exit -> exam ok summary', async () => {
     const { getByTestId, getByText, queryByTestId } = await render(<App />);
 
     // 1. Open drawer
@@ -58,9 +71,9 @@ describe('GeoGebra Replica App Integration Flow', () => {
     });
     expect(useExamStore.getState().isExamActive).toBe(true);
 
-    // Header must now be green with Calc. Gráfica and timer
+    // Header must now be green with Suite Calculadora and timer
     expect(getByTestId('exam-header')).toBeTruthy();
-    expect(getByText('Calc. Gráfica')).toBeTruthy();
+    expect(getByText('Suite Calculadora')).toBeTruthy();
 
     // 4. Open drawer during exam mode
     await act(async () => {
@@ -80,9 +93,10 @@ describe('GeoGebra Replica App Integration Flow', () => {
     });
     expect(useExamStore.getState().isExamActive).toBe(false);
 
-    // 7. Summary dialog "Examen: OK" is presented
+    // 7. Summary dialog "Examen: OK" is presented with "Suite Calculadora GeoGebra"
     expect(getByTestId('exam-ok-dialog')).toBeTruthy();
     expect(getByText('Examen: OK')).toBeTruthy();
+    expect(getByText('Suite Calculadora GeoGebra')).toBeTruthy();
     expect(getByText('Muestra esta pantalla a tu profesor')).toBeTruthy();
 
     // 8. Dismiss summary

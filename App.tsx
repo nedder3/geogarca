@@ -4,16 +4,16 @@ import {
   StyleSheet,
   Dimensions,
   BackHandler,
-  Platform,
 } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { TopAppBar } from '@/components/navigation/TopAppBar';
-import { BottomNavBar, MainTab } from '@/components/navigation/BottomNavBar';
+import { BottomNavBar, MainTab, AppNavigationMode } from '@/components/navigation/BottomNavBar';
 import { NavigationDrawer } from '@/components/navigation/NavigationDrawer';
 import { CartesianGrid } from '@/components/canvas/CartesianGrid';
 import { VirtualKeyboard } from '@/components/keyboard/VirtualKeyboard';
 import { AlgebraPanel } from '@/components/algebra/AlgebraPanel';
 import { ToolsGallery } from '@/components/tools/ToolsGallery';
+import { ProbabilityView } from '@/components/probability/ProbabilityView';
 import { SplashScreenView } from '@/components/splash/SplashScreenView';
 import {
   StartExamDialog,
@@ -25,7 +25,8 @@ import { useInputStore } from '@/stores/useInputStore';
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
-  const [activeTab, setActiveTab] = useState<MainTab>('algebra');
+  const [appMode, setAppMode] = useState<AppNavigationMode>('probability');
+  const [activeTab, setActiveTab] = useState<MainTab>('distribution');
   const [isDrawerOpen, setDrawerOpen] = useState(false);
 
   const isExamActive = useExamStore((state) => state.isExamActive);
@@ -76,7 +77,13 @@ export default function App() {
 
   const handleSelectDrawerOption = (optionId: string) => {
     setDrawerOpen(false);
-    if (optionId === 'exam') {
+    if (optionId === 'switch_probability') {
+      setAppMode('probability');
+      setActiveTab('distribution');
+    } else if (optionId === 'switch_graphing') {
+      setAppMode('graphing');
+      setActiveTab('algebra');
+    } else if (optionId === 'exam') {
       openStartModal();
     } else if (optionId === 'exit_exam') {
       requestExitExam();
@@ -87,8 +94,11 @@ export default function App() {
   const windowWidth = windowDimensions.width;
   const windowHeight = windowDimensions.height;
 
-  // Responsive canvas height: smaller when keyboard is up to let algebra list breathe
-  const canvasHeight = isKeyboardVisible && activeTab === 'algebra' ? 200 : Math.min(260, Math.floor(windowHeight * 0.32));
+  // Responsive canvas height for graphing mode
+  const canvasHeight =
+    isKeyboardVisible && activeTab === 'algebra'
+      ? 200
+      : Math.min(260, Math.floor(windowHeight * 0.32));
 
   return (
     <SafeAreaProvider>
@@ -96,31 +106,46 @@ export default function App() {
         <View style={styles.container}>
           {/* Top App Bar (Normal / Exam) */}
           <TopAppBar
+            title="Suite Calculadora"
             onOpenMenu={() => setDrawerOpen(true)}
             onOpenSettings={() => {}}
           />
 
-          {/* Viewport - Upper Half: Cartesian Canvas */}
-          <View style={[styles.canvasContainer, { height: canvasHeight }]}>
-            <CartesianGrid width={windowWidth} height={canvasHeight} />
-          </View>
+          {/* Main Viewport */}
+          {appMode === 'probability' ? (
+            <View style={styles.contentContainer}>
+              <ProbabilityView />
+            </View>
+          ) : (
+            <>
+              {/* Upper Half: Cartesian Canvas */}
+              <View style={[styles.canvasContainer, { height: canvasHeight }]}>
+                <CartesianGrid width={windowWidth} height={canvasHeight} />
+              </View>
 
-          {/* Viewport - Lower Half: Tabbed Content */}
-          <View style={styles.contentContainer}>
-            {activeTab === 'algebra' && <AlgebraPanel />}
-            {activeTab === 'tools' && <ToolsGallery />}
-            {activeTab === 'table' && <View style={styles.emptyView} />}
-            {activeTab === 'spreadsheet' && <View style={styles.emptyView} />}
-          </View>
+              {/* Lower Half: Tabbed Content */}
+              <View style={styles.contentContainer}>
+                {activeTab === 'algebra' && <AlgebraPanel />}
+                {activeTab === 'tools' && <ToolsGallery />}
+                {activeTab === 'table' && <View style={styles.emptyView} />}
+                {activeTab === 'spreadsheet' && <View style={styles.emptyView} />}
+              </View>
 
-          {/* Virtual Keyboard */}
-          {isKeyboardVisible && activeTab === 'algebra' && <VirtualKeyboard />}
+              {/* Virtual Keyboard */}
+              {isKeyboardVisible && activeTab === 'algebra' && <VirtualKeyboard />}
+            </>
+          )}
 
           {/* Bottom Navigation */}
-          <BottomNavBar activeTab={activeTab} onTabPress={setActiveTab} />
+          <BottomNavBar
+            mode={appMode}
+            activeTab={activeTab}
+            onTabPress={setActiveTab}
+          />
 
-          {/* Navigation Drawer (renders on top of everything) */}
+          {/* Navigation Drawer */}
           <NavigationDrawer
+            title="Suite Calculadora GeoGebra"
             visible={isDrawerOpen}
             onClose={() => setDrawerOpen(false)}
             onSelectOption={handleSelectDrawerOption}
@@ -140,6 +165,7 @@ export default function App() {
           />
 
           <ExamOkDialog
+            appName="Suite Calculadora GeoGebra"
             visible={isSummaryOpen}
             onDismiss={dismissSummary}
           />
