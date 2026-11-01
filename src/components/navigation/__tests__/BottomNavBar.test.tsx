@@ -8,10 +8,24 @@ describe('BottomNavBar Component', () => {
     useExamStore.getState().reset();
   });
 
-  it('renders all 4 tabs: Álgebra, Herramientas, Tabla, Hoja de Cálculo', async () => {
+  it('renders single Distribución tab when in probability mode', async () => {
+    const handlePress = jest.fn();
+    const { getByText, getByTestId, queryByText } = await render(
+      <BottomNavBar mode="probability" activeTab="distribution" onTabPress={handlePress} />
+    );
+
+    expect(getByText('Distribución')).toBeTruthy();
+    expect(getByTestId('tab-distribution')).toBeTruthy();
+    expect(queryByText('Álgebra')).toBeNull();
+
+    fireEvent.press(getByTestId('tab-distribution'));
+    expect(handlePress).toHaveBeenCalledWith('distribution');
+  });
+
+  it('renders all 4 tabs in graphing mode: Álgebra, Herramientas, Tabla, Hoja de Cálculo', async () => {
     const handlePress = jest.fn();
     const { getByText, getByTestId } = await render(
-      <BottomNavBar activeTab="algebra" onTabPress={handlePress} />
+      <BottomNavBar mode="graphing" activeTab="algebra" onTabPress={handlePress} />
     );
 
     expect(getByText('Álgebra')).toBeTruthy();
@@ -27,7 +41,7 @@ describe('BottomNavBar Component', () => {
     useExamStore.getState().startExam();
 
     const { getByTestId } = await render(
-      <BottomNavBar activeTab="algebra" onTabPress={jest.fn()} />
+      <BottomNavBar mode="probability" activeTab="distribution" onTabPress={jest.fn()} />
     );
 
     const navBar = getByTestId('bottom-nav-bar');

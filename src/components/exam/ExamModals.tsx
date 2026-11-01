@@ -76,12 +76,18 @@ export const ExitExamDialog: React.FC<ExitExamDialogProps> = ({ visible, onCance
 interface ExamOkDialogProps {
   visible: boolean;
   onDismiss: () => void;
+  appName?: string;
 }
 
 /**
  * ExamOkDialog matches WhatsApp Image 2026-10-31 at 10.48.05 PM (1).jpeg
+ * and Suite Calculadora exam confirmation
  */
-export const ExamOkDialog: React.FC<ExamOkDialogProps> = ({ visible, onDismiss }) => {
+export const ExamOkDialog: React.FC<ExamOkDialogProps> = ({
+  visible,
+  onDismiss,
+  appName = 'Suite Calculadora GeoGebra',
+}) => {
   const formattedDuration = useExamStore((state) => state.formattedDuration);
   const startDate = useExamStore((state) => state.startDate);
   const endDate = useExamStore((state) => state.endDate);
@@ -108,7 +114,7 @@ export const ExamOkDialog: React.FC<ExamOkDialogProps> = ({ visible, onDismiss }
       <View style={styles.summaryCard}>
         {/* Emerald Green Header */}
         <View style={styles.summaryHeader}>
-          <Text style={styles.summarySub}>Calculadora Gráfica GeoGebra</Text>
+          <Text style={styles.summarySub}>{appName}</Text>
           <Text style={styles.summaryTitle}>Examen: OK</Text>
         </View>
 

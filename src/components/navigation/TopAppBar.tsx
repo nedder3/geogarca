@@ -6,11 +6,20 @@ import { GeoGebraTheme } from '@/theme/tokens';
 import { useExamStore } from '@/stores/useExamStore';
 
 interface TopAppBarProps {
+  title?: string;
   onOpenMenu: () => void;
   onOpenSettings?: () => void;
+  onToggleCurve?: () => void;
+  onToggleTable?: () => void;
 }
 
-export const TopAppBar: React.FC<TopAppBarProps> = ({ onOpenMenu, onOpenSettings }) => {
+export const TopAppBar: React.FC<TopAppBarProps> = ({
+  title = 'Suite Calculadora',
+  onOpenMenu,
+  onOpenSettings,
+  onToggleCurve,
+  onToggleTable,
+}) => {
   const isExamActive = useExamStore((state) => state.isExamActive);
   const formattedDuration = useExamStore((state) => state.formattedDuration);
   const batteryLevel = useExamStore((state) => state.batteryLevel);
@@ -20,7 +29,7 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ onOpenMenu, onOpenSettings
       <View testID="exam-header" style={styles.examContainer}>
         <StatusBar style="light" />
         <View style={styles.statusBarMock}>
-          <Text style={styles.headerTitleSmall}>Calc. Gráfica</Text>
+          <Text style={styles.headerTitleSmall}>{title}</Text>
           <Text style={styles.timerText}>{formattedDuration}</Text>
           <View style={styles.batteryContainer}>
             <Text style={styles.batteryText}>{batteryLevel}%</Text>
@@ -36,14 +45,37 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ onOpenMenu, onOpenSettings
           >
             <Ionicons name="menu" size={24} color={GeoGebraTheme.colors.examTextOnGreen} />
           </TouchableOpacity>
-          <TouchableOpacity
-            testID="exam-settings-button"
-            onPress={onOpenSettings}
-            style={styles.iconButton}
-            accessibilityLabel="Configuración"
-          >
-            <Ionicons name="settings-sharp" size={22} color={GeoGebraTheme.colors.examTextOnGreen} />
-          </TouchableOpacity>
+
+          <View style={styles.examActionRight}>
+            <TouchableOpacity
+              testID="exam-curve-button"
+              onPress={onToggleCurve}
+              style={styles.iconButton}
+              accessibilityLabel="Curva de distribución"
+            >
+              <Ionicons name="pulse-outline" size={22} color={GeoGebraTheme.colors.examTextOnGreen} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              testID="exam-table-button"
+              onPress={onToggleTable}
+              style={styles.iconButton}
+              accessibilityLabel="Tabla de valores"
+            >
+              <Ionicons name="grid-outline" size={22} color={GeoGebraTheme.colors.examTextOnGreen} />
+            </TouchableOpacity>
+
+            {onOpenSettings && (
+              <TouchableOpacity
+                testID="exam-settings-button"
+                onPress={onOpenSettings}
+                style={styles.iconButton}
+                accessibilityLabel="Configuración"
+              >
+                <Ionicons name="settings-sharp" size={20} color={GeoGebraTheme.colors.examTextOnGreen} />
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
       </View>
     );
@@ -118,7 +150,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
+  },
+  examActionRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   iconButton: {
     padding: 8,

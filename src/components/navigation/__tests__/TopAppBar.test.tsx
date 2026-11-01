@@ -19,7 +19,7 @@ describe('TopAppBar Component', () => {
     expect(handleMenu).toHaveBeenCalledTimes(1);
   });
 
-  it('renders green exam header with timer and battery when exam mode is active', async () => {
+  it('renders green exam header with timer, battery, and Suite Calculadora title', async () => {
     useExamStore.getState().startExam();
     useExamStore.getState().tick(48); // 00:48
 
@@ -30,9 +30,11 @@ describe('TopAppBar Component', () => {
 
     expect(getByTestId('exam-header')).toBeTruthy();
     expect(queryByTestId('normal-header')).toBeNull();
-    expect(getByText('Calc. Gráfica')).toBeTruthy();
+    expect(getByText('Suite Calculadora')).toBeTruthy();
     expect(getByText('00:48')).toBeTruthy();
     expect(getByText('85%')).toBeTruthy();
+    expect(getByTestId('exam-curve-button')).toBeTruthy();
+    expect(getByTestId('exam-table-button')).toBeTruthy();
 
     fireEvent.press(getByTestId('exam-menu-button'));
     expect(handleMenu).toHaveBeenCalledTimes(1);

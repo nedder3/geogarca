@@ -13,7 +13,7 @@ describe('NavigationDrawer Component - Normal Mode', () => {
       <NavigationDrawer visible onClose={handleClose} onSelectOption={handleSelect} />
     );
 
-    expect(getByText('Calculadora Gráfica GeoGebra')).toBeTruthy();
+    expect(getByText('Suite Calculadora GeoGebra')).toBeTruthy();
     expect(getByText('Borrar todo')).toBeTruthy();
     expect(getByText('Abrir')).toBeTruthy();
     expect(getByText('Guardar')).toBeTruthy();

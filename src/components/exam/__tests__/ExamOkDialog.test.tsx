@@ -21,7 +21,7 @@ describe('ExamOkDialog Component', () => {
     );
 
     expect(getByText('Examen: OK')).toBeTruthy();
-    expect(getByText('Calculadora Gráfica GeoGebra')).toBeTruthy();
+    expect(getByText('Suite Calculadora GeoGebra')).toBeTruthy();
     expect(getByText('Muestra esta pantalla a tu profesor')).toBeTruthy();
     expect(getByText('01:03')).toBeTruthy();
 

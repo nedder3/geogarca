@@ -4,22 +4,50 @@ import { Ionicons } from '@expo/vector-icons';
 import { GeoGebraTheme } from '@/theme/tokens';
 import { useExamStore } from '@/stores/useExamStore';
 
-export type MainTab = 'algebra' | 'tools' | 'table' | 'spreadsheet';
+export type MainTab = 'distribution' | 'algebra' | 'tools' | 'table' | 'spreadsheet';
+export type AppNavigationMode = 'probability' | 'graphing';
 
 interface BottomNavBarProps {
   activeTab: MainTab;
   onTabPress: (tab: MainTab) => void;
+  mode?: AppNavigationMode;
 }
 
-export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, onTabPress }) => {
+const BellCurveIcon: React.FC<{ size?: number; color?: string }> = ({ size = 22, color = '#FFFFFF' }) => (
+  <View style={[styles.bellContainer, { width: size + 4, height: size }]}>
+    <View
+      style={[
+        styles.bellDome,
+        {
+          width: size * 0.75,
+          height: size * 0.65,
+          borderColor: color,
+        },
+      ]}
+    />
+    <View style={[styles.bellBase, { width: size + 4, backgroundColor: color }]} />
+  </View>
+);
+
+export const BottomNavBar: React.FC<BottomNavBarProps> = ({
+  activeTab,
+  onTabPress,
+  mode = 'probability',
+}) => {
   const isExamActive = useExamStore((state) => state.isExamActive);
 
-  const tabs: Array<{ id: MainTab; label: string; icon: keyof typeof Ionicons.glyphMap }> = [
+  const graphingTabs: Array<{ id: MainTab; label: string; icon: keyof typeof Ionicons.glyphMap }> = [
     { id: 'algebra', label: 'Álgebra', icon: 'calculator-outline' },
     { id: 'tools', label: 'Herramientas', icon: 'shapes-outline' },
     { id: 'table', label: 'Tabla', icon: 'grid-outline' },
     { id: 'spreadsheet', label: 'Hoja de Cálculo', icon: 'reader-outline' },
   ];
+
+  const probabilityTabs: Array<{ id: MainTab; label: string; icon: keyof typeof Ionicons.glyphMap }> = [
+    { id: 'distribution', label: 'Distribución', icon: 'pulse-outline' },
+  ];
+
+  const tabs = mode === 'probability' || activeTab === 'distribution' ? probabilityTabs : graphingTabs;
 
   return (
     <View
@@ -31,6 +59,14 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, onTabPres
     >
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
+        const iconColor = isExamActive
+          ? isActive
+            ? GeoGebraTheme.colors.examTextOnGreen
+            : '#80CBC4'
+          : isActive
+          ? GeoGebraTheme.colors.primaryPurple
+          : GeoGebraTheme.colors.bottomNavInactive;
+
         return (
           <TouchableOpacity
             key={tab.id}
@@ -46,19 +82,15 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, onTabPres
                 isActive && (isExamActive ? styles.iconPillActiveExam : styles.iconPillActive),
               ]}
             >
-              <Ionicons
-                name={tab.icon}
-                size={22}
-                color={
-                  isExamActive
-                    ? isActive
-                      ? GeoGebraTheme.colors.examTextOnGreen
-                      : '#80CBC4'
-                    : isActive
-                    ? GeoGebraTheme.colors.primaryPurple
-                    : GeoGebraTheme.colors.bottomNavInactive
-                }
-              />
+              {tab.id === 'distribution' ? (
+                <BellCurveIcon size={20} color={iconColor} />
+              ) : (
+                <Ionicons
+                  name={tab.icon}
+                  size={22}
+                  color={iconColor}
+                />
+              )}
             </View>
             <Text
               style={[
@@ -98,24 +130,27 @@ const styles = StyleSheet.create({
     borderTopColor: GeoGebraTheme.colors.examHeaderBorder,
   },
   tabButton: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    flex: 1,
+    paddingVertical: 4,
   },
   iconPill: {
-    paddingHorizontal: 16,
-    paddingVertical: 3,
-    borderRadius: GeoGebraTheme.radii.activeTabPill,
-    marginBottom: 2,
+    width: 48,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   iconPillActive: {
-    backgroundColor: GeoGebraTheme.colors.purplePillBg,
+    backgroundColor: GeoGebraTheme.colors.primaryPurpleLight,
   },
   iconPillActiveExam: {
     backgroundColor: GeoGebraTheme.colors.examNavActivePill,
   },
   label: {
-    fontSize: 11,
+    fontSize: GeoGebraTheme.typography.sizes.labelText,
+    marginTop: 2,
     fontWeight: GeoGebraTheme.typography.weights.medium,
   },
   labelActive: {
@@ -131,5 +166,18 @@ const styles = StyleSheet.create({
   },
   labelInactiveExam: {
     color: '#80CBC4',
+  },
+  bellContainer: {
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  bellDome: {
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    borderWidth: 2,
+    borderBottomWidth: 0,
+  },
+  bellBase: {
+    height: 2,
   },
 });

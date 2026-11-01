@@ -5,6 +5,7 @@ import { GeoGebraTheme } from '@/theme/tokens';
 import { useExamStore } from '@/stores/useExamStore';
 
 interface NavigationDrawerProps {
+  title?: string;
   visible: boolean;
   onClose: () => void;
   onSelectOption: (optionId: string) => void;
@@ -23,6 +24,7 @@ export interface DrawerOption {
  * - Exam mode: WhatsApp Image 2026-10-31 at 10.46.04 PM.jpeg
  */
 export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
+  title = 'Suite Calculadora GeoGebra',
   visible,
   onClose,
   onSelectOption,
@@ -33,6 +35,8 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
 
   // Options shown in Normal Mode
   const normalOptions: DrawerOption[] = [
+    { id: 'switch_probability', label: 'Probabilidad', icon: 'pulse-outline' },
+    { id: 'switch_graphing', label: 'Calculadora Gráfica', icon: 'calculator-outline', showDividerAfter: true },
     { id: 'clear_all', label: 'Borrar todo', icon: 'close-outline' },
     { id: 'open', label: 'Abrir', icon: 'search-outline' },
     { id: 'save', label: 'Guardar', icon: 'save-outline' },
@@ -64,7 +68,7 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
         accessibilityLabel="Cerrar menú"
       />
       <View style={styles.drawerPane}>
-        <Text style={styles.headerTitle}>Calculadora Gráfica GeoGebra</Text>
+        <Text style={styles.headerTitle}>{title}</Text>
 
         <View style={styles.optionsList}>
           {currentOptions.map((opt) => (
