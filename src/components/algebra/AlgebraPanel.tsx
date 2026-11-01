@@ -83,8 +83,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContent: {
-    padding: 12,
-    gap: 8,
+    padding: 10,
+    gap: 6,
   },
   itemCard: {
     flexDirection: 'row',
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     borderColor: GeoGebraTheme.colors.borderLight,
     borderRadius: 8,
     paddingHorizontal: 12,
-    paddingVertical: 14,
+    paddingVertical: 10,
   },
   circleIndicator: {
     width: 14,
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   },
   expressionText: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 15,
     color: GeoGebraTheme.colors.textPrimary,
     fontWeight: GeoGebraTheme.typography.weights.medium,
   },
@@ -119,8 +119,8 @@ const styles = StyleSheet.create({
     borderColor: GeoGebraTheme.colors.borderLight,
     borderRadius: 8,
     paddingHorizontal: 8,
-    paddingVertical: 12,
-    marginTop: 4,
+    paddingVertical: 10,
+    marginTop: 2,
   },
   plusIconWrapper: {
     paddingRight: 8,
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   inputText: {
-    fontSize: 16,
+    fontSize: 15,
     color: GeoGebraTheme.colors.textPrimary,
   },
   placeholderText: {

@@ -74,7 +74,7 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ onOpenMenu, onOpenSettings
 
 const styles = StyleSheet.create({
   normalContainer: {
-    height: 56,
+    height: 52,
     backgroundColor: GeoGebraTheme.colors.appBarBg,
     flexDirection: 'row',
     alignItems: 'center',
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   examActionBar: {
-    height: 52,
+    height: 48,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

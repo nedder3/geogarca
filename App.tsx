@@ -3,10 +3,10 @@ import {
   View,
   StyleSheet,
   Dimensions,
-  SafeAreaView,
   BackHandler,
   Platform,
 } from 'react-native';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { TopAppBar } from '@/components/navigation/TopAppBar';
 import { BottomNavBar, MainTab } from '@/components/navigation/BottomNavBar';
 import { NavigationDrawer } from '@/components/navigation/NavigationDrawer';
@@ -81,62 +81,69 @@ export default function App() {
     }
   };
 
-  const windowWidth = Dimensions.get('window').width;
+  const windowDimensions = Dimensions.get('window');
+  const windowWidth = windowDimensions.width;
+  const windowHeight = windowDimensions.height;
+
+  // Responsive canvas height: smaller when keyboard is up to let algebra list breathe
+  const canvasHeight = isKeyboardVisible && activeTab === 'algebra' ? 200 : Math.min(260, Math.floor(windowHeight * 0.32));
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        {/* Top App Bar (Normal / Exam) */}
-        <TopAppBar
-          onOpenMenu={() => setDrawerOpen(true)}
-          onOpenSettings={() => {}}
-        />
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.container}>
+          {/* Top App Bar (Normal / Exam) */}
+          <TopAppBar
+            onOpenMenu={() => setDrawerOpen(true)}
+            onOpenSettings={() => {}}
+          />
 
-        {/* Viewport - Upper Half: Cartesian Canvas */}
-        <View style={styles.canvasContainer}>
-          <CartesianGrid width={windowWidth} height={260} />
+          {/* Viewport - Upper Half: Cartesian Canvas */}
+          <View style={[styles.canvasContainer, { height: canvasHeight }]}>
+            <CartesianGrid width={windowWidth} height={canvasHeight} />
+          </View>
+
+          {/* Viewport - Lower Half: Tabbed Content */}
+          <View style={styles.contentContainer}>
+            {activeTab === 'algebra' && <AlgebraPanel />}
+            {activeTab === 'tools' && <ToolsGallery />}
+            {activeTab === 'table' && <View style={styles.emptyView} />}
+            {activeTab === 'spreadsheet' && <View style={styles.emptyView} />}
+          </View>
+
+          {/* Virtual Keyboard */}
+          {isKeyboardVisible && activeTab === 'algebra' && <VirtualKeyboard />}
+
+          {/* Bottom Navigation */}
+          <BottomNavBar activeTab={activeTab} onTabPress={setActiveTab} />
+
+          {/* Navigation Drawer (renders on top of everything) */}
+          <NavigationDrawer
+            visible={isDrawerOpen}
+            onClose={() => setDrawerOpen(false)}
+            onSelectOption={handleSelectDrawerOption}
+          />
+
+          {/* Exam Dialogs */}
+          <StartExamDialog
+            visible={isStartModalOpen}
+            onCancel={closeStartModal}
+            onConfirm={() => startExam()}
+          />
+
+          <ExitExamDialog
+            visible={isConfirmExitOpen}
+            onCancel={cancelExitExam}
+            onConfirmExit={() => finishExam()}
+          />
+
+          <ExamOkDialog
+            visible={isSummaryOpen}
+            onDismiss={dismissSummary}
+          />
         </View>
-
-        {/* Viewport - Lower Half: Tabbed Content */}
-        <View style={styles.contentContainer}>
-          {activeTab === 'algebra' && <AlgebraPanel />}
-          {activeTab === 'tools' && <ToolsGallery />}
-          {activeTab === 'table' && <View style={styles.emptyView} />}
-          {activeTab === 'spreadsheet' && <View style={styles.emptyView} />}
-        </View>
-
-        {/* Virtual Keyboard */}
-        {isKeyboardVisible && activeTab === 'algebra' && <VirtualKeyboard />}
-
-        {/* Bottom Navigation */}
-        <BottomNavBar activeTab={activeTab} onTabPress={setActiveTab} />
-
-        {/* Navigation Drawer */}
-        <NavigationDrawer
-          visible={isDrawerOpen}
-          onClose={() => setDrawerOpen(false)}
-          onSelectOption={handleSelectDrawerOption}
-        />
-
-        {/* Exam Dialogs */}
-        <StartExamDialog
-          visible={isStartModalOpen}
-          onCancel={closeStartModal}
-          onConfirm={() => startExam()}
-        />
-
-        <ExitExamDialog
-          visible={isConfirmExitOpen}
-          onCancel={cancelExitExam}
-          onConfirmExit={() => finishExam()}
-        />
-
-        <ExamOkDialog
-          visible={isSummaryOpen}
-          onDismiss={dismissSummary}
-        />
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
@@ -144,14 +151,12 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    paddingTop: Platform.OS === 'android' ? 24 : 0,
   },
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
   canvasContainer: {
-    height: 260,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#E2E2E6',

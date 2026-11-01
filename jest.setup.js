@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const React = require('react');
-const { Text } = require('react-native');
+const { Text, View } = require('react-native');
 
 jest.mock('@expo/vector-icons', () => {
   const React = require('react');
@@ -9,6 +9,17 @@ jest.mock('@expo/vector-icons', () => {
     Ionicons: (props) => React.createElement(Text, { testID: props.testID || `icon-${props.name}` }, props.name),
     MaterialIcons: (props) => React.createElement(Text, { testID: props.testID || `icon-${props.name}` }, props.name),
     MaterialCommunityIcons: (props) => React.createElement(Text, { testID: props.testID || `icon-${props.name}` }, props.name),
+  };
+});
+
+jest.mock('react-native-safe-area-context', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  return {
+    SafeAreaProvider: ({ children }: { children: React.ReactNode }) => React.createElement(View, null, children),
+    SafeAreaView: ({ children, style }: { children: React.ReactNode; style?: any }) =>
+      React.createElement(View, { style }, children),
+    useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
   };
 });
 

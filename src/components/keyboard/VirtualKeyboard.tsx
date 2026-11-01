@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
   },
   key: {
     flex: 1,
-    height: 40,
+    height: 36,
     backgroundColor: GeoGebraTheme.colors.keyBg,
     borderRadius: GeoGebraTheme.radii.keyboardKey,
     alignItems: 'center',

@@ -99,7 +99,8 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     flexDirection: 'row',
-    zIndex: 990,
+    zIndex: 9999,
+    elevation: 9999,
   },
   backdrop: {
     position: 'absolute',

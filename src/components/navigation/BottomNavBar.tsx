@@ -83,7 +83,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, onTabPres
 
 const styles = StyleSheet.create({
   container: {
-    height: 64,
+    height: 56,
     backgroundColor: GeoGebraTheme.colors.bottomNavBg,
     flexDirection: 'row',
     alignItems: 'center',
@@ -91,6 +91,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: GeoGebraTheme.colors.gridLines,
     paddingHorizontal: 8,
+    paddingBottom: 4,
   },
   containerExam: {
     backgroundColor: GeoGebraTheme.colors.examNavBg,
