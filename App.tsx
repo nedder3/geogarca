@@ -13,7 +13,10 @@ import { CartesianGrid } from '@/components/canvas/CartesianGrid';
 import { VirtualKeyboard } from '@/components/keyboard/VirtualKeyboard';
 import { AlgebraPanel } from '@/components/algebra/AlgebraPanel';
 import { ToolsGallery } from '@/components/tools/ToolsGallery';
+import { TableView } from '@/components/table/TableView';
+import { SpreadsheetView } from '@/components/spreadsheet/SpreadsheetView';
 import { ProbabilityView } from '@/components/probability/ProbabilityView';
+import { SettingsDialog } from '@/components/settings/SettingsDialog';
 import { SplashScreenView } from '@/components/splash/SplashScreenView';
 import {
   StartExamDialog,
@@ -28,6 +31,7 @@ export default function App() {
   const [appMode, setAppMode] = useState<AppNavigationMode>('probability');
   const [activeTab, setActiveTab] = useState<MainTab>('distribution');
   const [isDrawerOpen, setDrawerOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [showProbabilityTable, setShowProbabilityTable] = useState(false);
   const [showCurveOverlay, setShowCurveOverlay] = useState(false);
 
@@ -77,18 +81,45 @@ export default function App() {
     return () => subscription.remove();
   }, [isExamActive, requestExitExam]);
 
+  // Centralized sub-app navigation to prevent getting anchored
+  const navigateToSubApp = (mode: AppNavigationMode) => {
+    setAppMode(mode);
+    if (mode === 'probability') {
+      setActiveTab('distribution');
+    } else {
+      setActiveTab('algebra');
+    }
+  };
+
   const handleSelectDrawerOption = (optionId: string) => {
     setDrawerOpen(false);
     if (optionId === 'switch_probability') {
-      setAppMode('probability');
-      setActiveTab('distribution');
+      navigateToSubApp('probability');
     } else if (optionId === 'switch_graphing') {
-      setAppMode('graphing');
-      setActiveTab('algebra');
+      navigateToSubApp('graphing');
     } else if (optionId === 'exam') {
       openStartModal();
     } else if (optionId === 'exit_exam') {
       requestExitExam();
+    } else if (optionId === 'settings') {
+      setIsSettingsOpen(true);
+    }
+  };
+
+  const handleToggleCurve = () => {
+    // Top bar curve icon switches between Calculadora Gráfica and Probabilidad
+    if (appMode === 'graphing') {
+      navigateToSubApp('probability');
+    } else {
+      navigateToSubApp('graphing');
+    }
+  };
+
+  const handleToggleTable = () => {
+    if (appMode === 'graphing') {
+      setActiveTab('table');
+    } else {
+      setShowProbabilityTable((prev) => !prev);
     }
   };
 
@@ -109,11 +140,12 @@ export default function App() {
           {/* Top App Bar (Normal / Exam) */}
           <TopAppBar
             title="Suite Calculadora"
-            showProbabilityActions={appMode === 'probability'}
+            isExamActive={isExamActive}
+            showProbabilityActions={true}
             onOpenMenu={() => setDrawerOpen(true)}
-            onOpenSettings={() => {}}
-            onToggleCurve={() => setShowCurveOverlay((prev) => !prev)}
-            onToggleTable={() => setShowProbabilityTable((prev) => !prev)}
+            onOpenSettings={() => setIsSettingsOpen(true)}
+            onToggleCurve={handleToggleCurve}
+            onToggleTable={handleToggleTable}
           />
 
           {/* Main Viewport */}
@@ -135,8 +167,8 @@ export default function App() {
               <View style={styles.contentContainer}>
                 {activeTab === 'algebra' && <AlgebraPanel />}
                 {activeTab === 'tools' && <ToolsGallery />}
-                {activeTab === 'table' && <View style={styles.emptyView} />}
-                {activeTab === 'spreadsheet' && <View style={styles.emptyView} />}
+                {activeTab === 'table' && <TableView />}
+                {activeTab === 'spreadsheet' && <SpreadsheetView />}
               </View>
 
               {/* Virtual Keyboard */}
@@ -154,6 +186,7 @@ export default function App() {
           {/* Navigation Drawer */}
           <NavigationDrawer
             title="Suite Calculadora GeoGebra"
+            activeAppMode={appMode}
             visible={isDrawerOpen}
             onClose={() => setDrawerOpen(false)}
             onSelectOption={handleSelectDrawerOption}
@@ -176,6 +209,12 @@ export default function App() {
             appName="Suite Calculadora GeoGebra"
             visible={isSummaryOpen}
             onDismiss={dismissSummary}
+          />
+
+          {/* Settings / Properties Modal */}
+          <SettingsDialog
+            visible={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
           />
 
           {/* Animated In-App Splash Screen */}
@@ -207,9 +246,5 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-  },
-  emptyView: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
   },
 });

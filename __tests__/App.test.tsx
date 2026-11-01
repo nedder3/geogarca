@@ -24,7 +24,7 @@ describe('GeoGebra Suite Replica App Integration Flow', () => {
     expect(queryByText('Álgebra')).toBeNull();
   });
 
-  it('allows switching to Calculadora Gráfica via drawer and using tabs', async () => {
+  it('allows switching to Calculadora Gráfica and navigating all 4 tabs with functional TableView and SpreadsheetView', async () => {
     const { getByTestId, getByText, queryByTestId } = await render(<App />);
 
     // Open drawer
@@ -48,6 +48,64 @@ describe('GeoGebra Suite Replica App Integration Flow', () => {
     });
     expect(getByTestId('tools-gallery')).toBeTruthy();
     expect(queryByTestId('algebra-panel')).toBeNull();
+
+    // Switch to Tabla (Functional TableView)
+    await act(async () => {
+      fireEvent.press(getByTestId('tab-table'));
+    });
+    expect(getByTestId('table-view')).toBeTruthy();
+    expect(getByText('f(x) = x²')).toBeTruthy();
+
+    // Switch to Hoja de Cálculo (Functional SpreadsheetView)
+    await act(async () => {
+      fireEvent.press(getByTestId('tab-spreadsheet'));
+    });
+    expect(getByTestId('spreadsheet-view')).toBeTruthy();
+    expect(getByText('A')).toBeTruthy();
+    expect(getByText('B')).toBeTruthy();
+  });
+
+  it('allows seamless switching between Calculadora Gráfica and Probabilidad via top curve icon and via drawer in Exam Mode', async () => {
+    useExamStore.getState().startExam();
+
+    const { getByTestId, getByText, queryByTestId } = await render(<App />);
+
+    expect(getByTestId('exam-header')).toBeTruthy();
+    expect(getByTestId('probability-chart')).toBeTruthy();
+
+    // 1. Switch to Calculadora Gráfica using top curve button
+    await act(async () => {
+      fireEvent.press(getByTestId('exam-curve-button'));
+    });
+    expect(getByTestId('cartesian-grid')).toBeTruthy();
+    expect(getByTestId('algebra-panel')).toBeTruthy();
+
+    // 2. Open drawer during Exam mode - sub-apps MUST NOT be missing
+    await act(async () => {
+      fireEvent.press(getByTestId('exam-menu-button'));
+    });
+    expect(getByTestId('drawer-opt-switch_probability')).toBeTruthy();
+    expect(getByTestId('drawer-opt-switch_graphing')).toBeTruthy();
+
+    // 3. Switch back to Probabilidad via drawer
+    await act(async () => {
+      fireEvent.press(getByTestId('drawer-opt-switch_probability'));
+    });
+    expect(getByTestId('probability-chart')).toBeTruthy();
+
+    // 4. Open Settings modal via top bar gear icon
+    expect(queryByTestId('settings-dialog')).toBeNull();
+    await act(async () => {
+      fireEvent.press(getByTestId('exam-settings-button'));
+    });
+    expect(getByTestId('settings-dialog')).toBeTruthy();
+    expect(getByText('Propiedades')).toBeTruthy();
+
+    // Close Settings
+    await act(async () => {
+      fireEvent.press(getByTestId('settings-ok-btn'));
+    });
+    expect(queryByTestId('settings-dialog')).toBeNull();
   });
 
   it('executes complete exam lifecycle in Suite Calculadora: open drawer -> start exam -> green header -> exit -> exam ok summary', async () => {
