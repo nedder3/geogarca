@@ -28,6 +28,8 @@ export default function App() {
   const [appMode, setAppMode] = useState<AppNavigationMode>('probability');
   const [activeTab, setActiveTab] = useState<MainTab>('distribution');
   const [isDrawerOpen, setDrawerOpen] = useState(false);
+  const [showProbabilityTable, setShowProbabilityTable] = useState(false);
+  const [showCurveOverlay, setShowCurveOverlay] = useState(false);
 
   const isExamActive = useExamStore((state) => state.isExamActive);
   const isStartModalOpen = useExamStore((state) => state.isStartModalOpen);
@@ -107,14 +109,20 @@ export default function App() {
           {/* Top App Bar (Normal / Exam) */}
           <TopAppBar
             title="Suite Calculadora"
+            showProbabilityActions={appMode === 'probability'}
             onOpenMenu={() => setDrawerOpen(true)}
             onOpenSettings={() => {}}
+            onToggleCurve={() => setShowCurveOverlay((prev) => !prev)}
+            onToggleTable={() => setShowProbabilityTable((prev) => !prev)}
           />
 
           {/* Main Viewport */}
           {appMode === 'probability' ? (
             <View style={styles.contentContainer}>
-              <ProbabilityView />
+              <ProbabilityView
+                showTable={showProbabilityTable}
+                showCurveOverlay={showCurveOverlay}
+              />
             </View>
           ) : (
             <>

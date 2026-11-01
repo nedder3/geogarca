@@ -7,6 +7,7 @@ import { useExamStore } from '@/stores/useExamStore';
 
 interface TopAppBarProps {
   title?: string;
+  showProbabilityActions?: boolean;
   onOpenMenu: () => void;
   onOpenSettings?: () => void;
   onToggleCurve?: () => void;
@@ -15,6 +16,7 @@ interface TopAppBarProps {
 
 export const TopAppBar: React.FC<TopAppBarProps> = ({
   title = 'Suite Calculadora',
+  showProbabilityActions = false,
   onOpenMenu,
   onOpenSettings,
   onToggleCurve,
@@ -92,14 +94,38 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({
       >
         <Ionicons name="menu" size={26} color={GeoGebraTheme.colors.textPrimary} />
       </TouchableOpacity>
-      <TouchableOpacity
-        testID="settings-button"
-        onPress={onOpenSettings}
-        style={styles.iconButton}
-        accessibilityLabel="Configuración"
-      >
-        <Ionicons name="settings-sharp" size={24} color={GeoGebraTheme.colors.textPrimary} />
-      </TouchableOpacity>
+
+      <View style={styles.actionRight}>
+        {showProbabilityActions && (
+          <>
+            <TouchableOpacity
+              testID="curve-button"
+              onPress={onToggleCurve}
+              style={styles.iconButton}
+              accessibilityLabel="Curva de distribución"
+            >
+              <Ionicons name="pulse-outline" size={22} color={GeoGebraTheme.colors.textPrimary} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              testID="table-button"
+              onPress={onToggleTable}
+              style={styles.iconButton}
+              accessibilityLabel="Tabla de valores"
+            >
+              <Ionicons name="grid-outline" size={22} color={GeoGebraTheme.colors.textPrimary} />
+            </TouchableOpacity>
+          </>
+        )}
+        <TouchableOpacity
+          testID="settings-button"
+          onPress={onOpenSettings}
+          style={styles.iconButton}
+          accessibilityLabel="Configuración"
+        >
+          <Ionicons name="settings-sharp" size={24} color={GeoGebraTheme.colors.textPrimary} />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -156,6 +182,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+  },
+  actionRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   iconButton: {
     padding: 8,

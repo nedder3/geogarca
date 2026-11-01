@@ -18,7 +18,7 @@ describe('GeoGebra Suite Replica App Integration Flow', () => {
     expect(getByTestId('normal-header')).toBeTruthy();
     expect(getByTestId('probability-chart')).toBeTruthy();
     expect(getByTestId('bottom-nav-bar')).toBeTruthy();
-    expect(getByText('Distribución')).toBeTruthy();
+    expect(getByTestId('tab-distribution')).toBeTruthy();
     expect(getByText('Population')).toBeTruthy();
     expect(getByText('Parámetro n')).toBeTruthy();
     expect(queryByText('Álgebra')).toBeNull();
@@ -104,5 +104,45 @@ describe('GeoGebra Suite Replica App Integration Flow', () => {
       fireEvent.press(getByTestId('btn-dismiss-ok'));
     });
     expect(queryByTestId('exam-ok-dialog')).toBeNull();
+  });
+
+  it('allows switching distributions and toggling probability table during active Exam mode', async () => {
+    useExamStore.getState().startExam();
+
+    const { getByTestId, getByText, queryByTestId } = await render(<App />);
+
+    expect(getByTestId('exam-header')).toBeTruthy();
+    expect(getByText('Suite Calculadora')).toBeTruthy();
+
+    // 1. Toggle distribution picker during exam
+    await act(async () => {
+      fireEvent.press(getByTestId('distribution-selector-btn'));
+    });
+    expect(getByTestId('distribution-picker-modal')).toBeTruthy();
+
+    // 2. Select Poisson
+    await act(async () => {
+      fireEvent.press(getByTestId('dist-option-poisson'));
+    });
+    expect(getByText('Poisson')).toBeTruthy();
+    expect(getByText('Media λ')).toBeTruthy();
+
+    // 3. Toggle table via top bar exam button
+    expect(queryByTestId('probability-table')).toBeNull();
+    await act(async () => {
+      fireEvent.press(getByTestId('exam-table-button'));
+    });
+    expect(getByTestId('probability-table')).toBeTruthy();
+    expect(getByText('P(X = k)')).toBeTruthy();
+
+    // 4. Switch to Binomial
+    await act(async () => {
+      fireEvent.press(getByTestId('distribution-selector-btn'));
+    });
+    await act(async () => {
+      fireEvent.press(getByTestId('dist-option-binomial'));
+    });
+    expect(getByText('Binomial')).toBeTruthy();
+    expect(getByText('Ensayos n')).toBeTruthy();
   });
 });
