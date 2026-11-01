@@ -11,7 +11,7 @@
       "bundleIdentifier": "org.geogebra.mobile"
     },
     "android": {
-      "package": "org.geogebra.android",
+      "package": "org.geogebra.mobile",
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/android-icon-foreground.png"
