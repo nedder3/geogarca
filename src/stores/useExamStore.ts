@@ -12,6 +12,7 @@ export interface ExamState {
   batteryLevel: number; // 0..100
 
   // Actions
+  setBatteryLevel: (level: number) => void;
   openStartModal: () => void;
   closeStartModal: () => void;
   startExam: (now?: Date) => void;
@@ -46,8 +47,9 @@ export const useExamStore = create<ExamState>((set) => ({
   formattedDuration: '00:00',
   startDate: null,
   endDate: null,
-  batteryLevel: 85,
+  batteryLevel: 100,
 
+  setBatteryLevel: (batteryLevel: number) => set({ batteryLevel }),
   openStartModal: () => set({ isStartModalOpen: true }),
   closeStartModal: () => set({ isStartModalOpen: false }),
 
@@ -115,7 +117,7 @@ export const useExamStore = create<ExamState>((set) => ({
   dismissSummary: () => set({ isSummaryOpen: false }),
 
   reset: () =>
-    set({
+    set((state) => ({
       isExamActive: false,
       isStartModalOpen: false,
       isConfirmExitOpen: false,
@@ -124,6 +126,6 @@ export const useExamStore = create<ExamState>((set) => ({
       formattedDuration: '00:00',
       startDate: null,
       endDate: null,
-      batteryLevel: 85,
-    }),
+      batteryLevel: state.batteryLevel,
+    })),
 }));

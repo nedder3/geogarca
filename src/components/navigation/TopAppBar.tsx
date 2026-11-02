@@ -29,16 +29,26 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({
   const formattedDuration = useExamStore((state) => state.formattedDuration);
   const batteryLevel = useExamStore((state) => state.batteryLevel);
 
+  const getBatteryIcon = (level: number): keyof typeof Ionicons.glyphMap => {
+    if (level >= 80) return 'battery-full';
+    if (level >= 30) return 'battery-half';
+    return 'battery-dead';
+  };
+
   if (isExamActive) {
     return (
       <View testID="exam-header" style={styles.examContainer}>
-        <StatusBar style="light" />
+        <StatusBar style="light" hidden={true} />
         <View style={styles.statusBarMock}>
           <Text style={styles.headerTitleSmall}>{title}</Text>
           <Text style={styles.timerText}>{formattedDuration}</Text>
           <View style={styles.batteryContainer}>
             <Text style={styles.batteryText}>{batteryLevel}%</Text>
-            <Ionicons name="battery-full" size={16} color={GeoGebraTheme.colors.examTextOnGreen} />
+            <Ionicons
+              name={getBatteryIcon(batteryLevel)}
+              size={16}
+              color={GeoGebraTheme.colors.examTextOnGreen}
+            />
           </View>
         </View>
         <View style={styles.examActionBar}>
@@ -88,7 +98,7 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({
 
   return (
     <View testID="normal-header" style={styles.normalContainer}>
-      <StatusBar style="dark" />
+      <StatusBar style="dark" hidden={false} />
       <TouchableOpacity
         testID="menu-button"
         onPress={onOpenMenu}

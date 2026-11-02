@@ -22,6 +22,20 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
+jest.mock('expo-battery', () => ({
+  getBatteryLevelAsync: jest.fn().mockResolvedValue(0.85),
+  getBatteryStateAsync: jest.fn().mockResolvedValue(1),
+  isBatteryOptimizationEnabledAsync: jest.fn().mockResolvedValue(false),
+  addBatteryLevelListener: jest.fn().mockReturnValue({ remove: jest.fn() }),
+  addBatteryStateListener: jest.fn().mockReturnValue({ remove: jest.fn() }),
+  BatteryState: {
+    UNKNOWN: 0,
+    UNPLUGGED: 1,
+    CHARGING: 2,
+    FULL: 3,
+  },
+}));
+
 // Suppress known React 19 test renderer act() warning in synthetic tests
 const originalConsoleError = console.error;
 console.error = (...args) => {
