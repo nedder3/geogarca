@@ -83,4 +83,13 @@ describe('useExamStore', () => {
     useExamStore.getState().dismissSummary();
     expect(useExamStore.getState().isSummaryOpen).toBe(false);
   });
+
+  it('should update batteryLevel via setBatteryLevel and persist level across reset', () => {
+    useExamStore.getState().setBatteryLevel(32);
+    expect(useExamStore.getState().batteryLevel).toBe(32);
+
+    useExamStore.getState().reset();
+    // Device battery should not be reset to hardcoded 85 or 100 on app state reset
+    expect(useExamStore.getState().batteryLevel).toBe(32);
+  });
 });

@@ -1,5 +1,7 @@
 import React from 'react';
 import { render, fireEvent, cleanup, act } from '@testing-library/react-native';
+import { StatusBar as RNStatusBar } from 'react-native';
+import * as Battery from 'expo-battery';
 import App from '../App';
 import { useExamStore } from '@/stores/useExamStore';
 import { useInputStore } from '@/stores/useInputStore';
@@ -202,5 +204,36 @@ describe('GeoGebra Suite Replica App Integration Flow', () => {
     });
     expect(getByText('Binomial')).toBeTruthy();
     expect(getByText('Ensayos n')).toBeTruthy();
+  });
+
+  it('hides native system status bar and syncs device battery level when entering exam mode', async () => {
+    const setHiddenSpy = jest.spyOn(RNStatusBar, 'setHidden');
+    jest.spyOn(Battery, 'getBatteryLevelAsync').mockResolvedValue(0.32);
+
+    const { getByTestId, getByText } = await render(<App />);
+
+    // Initially status bar is visible
+    expect(setHiddenSpy).toHaveBeenCalledWith(false, 'fade');
+
+    // Start exam
+    await act(async () => {
+      useExamStore.getState().startExam();
+    });
+
+    // Native status bar should be hidden to avoid double status bar/battery
+    expect(setHiddenSpy).toHaveBeenCalledWith(true, 'fade');
+    expect(getByTestId('exam-header')).toBeTruthy();
+
+    // Verify battery level was synced (32% from mock)
+    expect(useExamStore.getState().batteryLevel).toBe(32);
+    expect(getByText('32%')).toBeTruthy();
+
+    // Exit exam
+    await act(async () => {
+      useExamStore.getState().finishExam();
+    });
+
+    // System status bar is restored when exam ends
+    expect(setHiddenSpy).toHaveBeenCalledWith(false, 'fade');
   });
 });
