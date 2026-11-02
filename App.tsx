@@ -6,8 +6,11 @@ import {
   BackHandler,
   AppState,
   AppStateStatus,
+  StatusBar as RNStatusBar,
 } from 'react-native';
+import * as Battery from 'expo-battery';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
+import { GeoGebraTheme } from '@/theme/tokens';
 import { TopAppBar } from '@/components/navigation/TopAppBar';
 import { BottomNavBar, MainTab, AppNavigationMode } from '@/components/navigation/BottomNavBar';
 import { NavigationDrawer } from '@/components/navigation/NavigationDrawer';
@@ -50,8 +53,46 @@ export default function App() {
   const cancelExitExam = useExamStore((state) => state.cancelExitExam);
   const finishExam = useExamStore((state) => state.finishExam);
   const dismissSummary = useExamStore((state) => state.dismissSummary);
+  const setBatteryLevel = useExamStore((state) => state.setBatteryLevel);
 
   const isKeyboardVisible = useInputStore((state) => state.isKeyboardVisible);
+
+  // Synchronize real hardware battery level and listen for changes
+  useEffect(() => {
+    let batterySub: Battery.Subscription | null = null;
+
+    async function syncBattery() {
+      try {
+        const level = await Battery.getBatteryLevelAsync();
+        if (typeof level === 'number' && level >= 0) {
+          setBatteryLevel(Math.round(level * 100));
+        }
+      } catch {
+        // Fallback gracefully on devices/environments without battery sensors
+      }
+
+      try {
+        batterySub = Battery.addBatteryLevelListener(({ batteryLevel }) => {
+          if (typeof batteryLevel === 'number' && batteryLevel >= 0) {
+            setBatteryLevel(Math.round(batteryLevel * 100));
+          }
+        });
+      } catch {
+        // Fallback
+      }
+    }
+
+    syncBattery();
+
+    return () => {
+      batterySub?.remove();
+    };
+  }, [setBatteryLevel]);
+
+  // Toggle Android native system status bar visibility to prevent double status bar in Exam Mode
+  useEffect(() => {
+    RNStatusBar.setHidden(isExamActive, 'fade');
+  }, [isExamActive]);
 
   // Timer in live Exam Mode (Wall-Clock synced)
   useEffect(() => {
@@ -147,7 +188,13 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView
+        style={[
+          styles.safeArea,
+          isExamActive && { backgroundColor: GeoGebraTheme.colors.examHeaderDark },
+        ]}
+        edges={isExamActive ? ['bottom', 'left', 'right'] : ['top', 'bottom', 'left', 'right']}
+      >
         <View style={styles.container}>
           {/* Top App Bar (Normal / Exam) */}
           <TopAppBar
