@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { GeoGebraTheme } from '@/theme/tokens';
-import { useExamStore } from '@/stores/useExamStore';
+import { useExamStore, formatDuration } from '@/stores/useExamStore';
 
 interface StartExamDialogProps {
   visible: boolean;
@@ -92,6 +92,11 @@ export const ExamOkDialog: React.FC<ExamOkDialogProps> = ({
   const startDate = useExamStore((state) => state.startDate);
   const endDate = useExamStore((state) => state.endDate);
 
+  const calculatedDuration =
+    startDate && endDate
+      ? formatDuration(Math.max(0, Math.floor((endDate.getTime() - startDate.getTime()) / 1000)))
+      : formattedDuration;
+
   if (!visible) return null;
 
   const formatTime = (date: Date | null) => {
@@ -124,7 +129,7 @@ export const ExamOkDialog: React.FC<ExamOkDialogProps> = ({
 
           <View style={styles.statGroup}>
             <Text style={styles.statLabel}>Duración</Text>
-            <Text style={styles.statValue}>{formattedDuration}</Text>
+            <Text style={styles.statValue}>{calculatedDuration}</Text>
           </View>
 
           <View style={styles.statGroup}>

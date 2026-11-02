@@ -15,7 +15,7 @@ export interface ExamState {
   openStartModal: () => void;
   closeStartModal: () => void;
   startExam: (now?: Date) => void;
-  tick: (seconds?: number) => void;
+  tick: (timeOrSeconds?: Date | number) => void;
   requestExitExam: () => void;
   cancelExitExam: () => void;
   finishExam: (now?: Date) => void;
@@ -23,11 +23,17 @@ export interface ExamState {
   reset: () => void;
 }
 
-const formatMMSS = (totalSeconds: number): string => {
-  const minutes = Math.floor(totalSeconds / 60);
+export const formatDuration = (totalSeconds: number): string => {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
   const mm = minutes.toString().padStart(2, '0');
   const ss = seconds.toString().padStart(2, '0');
+
+  if (hours > 0) {
+    const hh = hours.toString().padStart(2, '0');
+    return `${hh}:${mm}:${ss}`;
+  }
   return `${mm}:${ss}`;
 };
 
@@ -57,12 +63,33 @@ export const useExamStore = create<ExamState>((set) => ({
       endDate: null,
     }),
 
-  tick: (seconds) =>
+  tick: (timeOrSeconds) =>
     set((state) => {
-      const nextSeconds = seconds !== undefined ? seconds : state.elapsedSeconds + 1;
+      // Explicit numeric seconds override (for tests / manual overrides)
+      if (typeof timeOrSeconds === 'number') {
+        return {
+          elapsedSeconds: timeOrSeconds,
+          formattedDuration: formatDuration(timeOrSeconds),
+        };
+      }
+
+      // Wall-clock time difference calculation (immune to background suspension)
+      const now = timeOrSeconds instanceof Date ? timeOrSeconds : new Date();
+      if (state.startDate) {
+        const diffSeconds = Math.max(
+          0,
+          Math.floor((now.getTime() - state.startDate.getTime()) / 1000)
+        );
+        return {
+          elapsedSeconds: diffSeconds,
+          formattedDuration: formatDuration(diffSeconds),
+        };
+      }
+
+      const nextSeconds = state.elapsedSeconds + 1;
       return {
         elapsedSeconds: nextSeconds,
-        formattedDuration: formatMMSS(nextSeconds),
+        formattedDuration: formatDuration(nextSeconds),
       };
     }),
 
@@ -70,12 +97,20 @@ export const useExamStore = create<ExamState>((set) => ({
   cancelExitExam: () => set({ isConfirmExitOpen: false }),
 
   finishExam: (now = new Date()) =>
-    set((state) => ({
-      isExamActive: false,
-      isConfirmExitOpen: false,
-      isSummaryOpen: true,
-      endDate: now,
-    })),
+    set((state) => {
+      const finalSeconds = state.startDate
+        ? Math.max(0, Math.floor((now.getTime() - state.startDate.getTime()) / 1000))
+        : state.elapsedSeconds;
+
+      return {
+        isExamActive: false,
+        isConfirmExitOpen: false,
+        isSummaryOpen: true,
+        endDate: now,
+        elapsedSeconds: finalSeconds,
+        formattedDuration: formatDuration(finalSeconds),
+      };
+    }),
 
   dismissSummary: () => set({ isSummaryOpen: false }),
 

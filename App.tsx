@@ -4,6 +4,8 @@ import {
   StyleSheet,
   Dimensions,
   BackHandler,
+  AppState,
+  AppStateStatus,
 } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { TopAppBar } from '@/components/navigation/TopAppBar';
@@ -51,7 +53,7 @@ export default function App() {
 
   const isKeyboardVisible = useInputStore((state) => state.isKeyboardVisible);
 
-  // Timer in live Exam Mode
+  // Timer in live Exam Mode (Wall-Clock synced)
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
     if (isExamActive) {
@@ -62,6 +64,16 @@ export default function App() {
     return () => {
       if (interval) clearInterval(interval);
     };
+  }, [isExamActive, tick]);
+
+  // Synchronize immediately with wall-clock time when app returns from background
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+      if (nextAppState === 'active' && isExamActive) {
+        tick();
+      }
+    });
+    return () => subscription.remove();
   }, [isExamActive, tick]);
 
   // Handle hardware back button on Android during Exam Mode
